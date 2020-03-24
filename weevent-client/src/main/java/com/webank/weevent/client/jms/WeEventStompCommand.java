@@ -118,11 +118,10 @@ public class WeEventStompCommand {
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
-        if (weEvent.getExtensions() != null) {
-            for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
-                accessor.setNativeHeader(entry.getKey(), entry.getValue());
-            }
+        for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
+            accessor.setNativeHeader(entry.getKey(), entry.getValue());
         }
+
         return encodeRaw(accessor, weEvent.getContent());
     }
 

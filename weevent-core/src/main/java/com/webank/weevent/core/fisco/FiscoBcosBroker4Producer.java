@@ -39,7 +39,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         ParamCheckUtils.validateEvent(event);
 
         // publishEvent support async operator in callback
-        if (event.getExtensions() != null && event.getExtensions().containsKey(WeEvent.WeEvent_SIGN)) {
+        if (event.getExtensions().containsKey(WeEvent.WeEvent_SIGN)) {
             return fiscoBcosDelegate.sendRawTransaction(event.getTopic(),
                     Long.parseLong(groupId),
                     new String(event.getContent(), StandardCharsets.UTF_8));

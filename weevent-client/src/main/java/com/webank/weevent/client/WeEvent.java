@@ -1,6 +1,7 @@
 package com.webank.weevent.client;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
@@ -86,6 +87,7 @@ public class WeEvent {
     public WeEvent(String topic, byte[] content) {
         this.topic = topic;
         this.content = content;
+        this.extensions = new HashMap<>();
     }
 
     /**

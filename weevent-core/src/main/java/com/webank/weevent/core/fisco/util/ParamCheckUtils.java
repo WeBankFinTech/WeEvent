@@ -97,6 +97,8 @@ public class ParamCheckUtils {
             if (event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
                 throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
             }
+        } else {
+            throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_IS_NUll);
         }
     }
 

@@ -288,8 +288,7 @@ public class Subscription {
                     if (StringUtils.isBlank(tag)) {
                         to.add(event);
                     } else {    // subscription in tag plus
-                        if (event.getExtensions() != null
-                                && tag.equals(event.getExtensions().get(WeEvent.WeEvent_TAG))) {
+                        if (tag.equals(event.getExtensions().get(WeEvent.WeEvent_TAG))) {
                             to.add(event);
                         }
                     }
