@@ -195,33 +195,41 @@ public class SupportedVersion {
         return true;
     }
 
-    public static WeEvent decodeWeEvent(BigInteger timestamp, TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) throws BrokerException {
-        // support version list
-        switch (version) {
-            case 10:
-                // v10 is com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic
-                Topic topic = (Topic) historyTopic.get(receipt.getTo());
-                Tuple3<String, String, String> input = topic.getPublishWeEventInput(receipt);
-                Tuple1<BigInteger> output = topic.getPublishWeEventOutput(receipt);
+    public static WeEvent decodeWeEvent(BigInteger timestamp, TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) {
+        try {
+            // support version list
+            switch (version) {
+                case 10:
+                    // v10 is com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic
+                    Topic topic = (Topic) historyTopic.get(receipt.getTo());
+                    Tuple3<String, String, String> input = topic.getPublishWeEventInput(receipt);
+                    Tuple1<BigInteger> output = topic.getPublishWeEventOutput(receipt);
+                    long seq = output.getValue1().longValue();
+                    if (seq <= 0) {
+                        log.warn("skip data for invalid sequence: {}", seq);
+                        return null;
+                    }
 
-                String topicName = input.getValue1();
-                Map<String, String> extensions = JsonHelper.json2Object(input.getValue3(), new TypeReference<Map<String, String>>() {
-                });
-                if (extensions == null) {
-                    extensions = new HashMap<>();
-                }
-                WeEventPlus weEventPlus = new WeEventPlus(timestamp.longValue(), receipt.getBlockNumber().longValue(), receipt.getTransactionHash(), receipt.getFrom());
-                extensions.put(WeEvent.WeEvent_PLUS, JsonHelper.object2Json(weEventPlus));
+                    String topicName = input.getValue1();
+                    Map<String, String> extensions = JsonHelper.json2Object(input.getValue3(), new TypeReference<Map<String, String>>() {
+                    });
+                    if (extensions == null) {
+                        extensions = new HashMap<>();
+                    }
+                    WeEventPlus weEventPlus = new WeEventPlus(timestamp.longValue(), receipt.getBlockNumber().longValue(), receipt.getTransactionHash(), receipt.getFrom());
+                    extensions.put(WeEvent.WeEvent_PLUS, JsonHelper.object2Json(weEventPlus));
 
-                WeEvent event = new WeEvent(topicName, input.getValue2().getBytes(StandardCharsets.UTF_8), extensions);
-                event.setEventId(DataTypeUtils.encodeEventId(topicName,
-                        receipt.getBlockNumber().intValue(),
-                        output.getValue1().intValue()));
-                return event;
+                    WeEvent event = new WeEvent(topicName, input.getValue2().getBytes(StandardCharsets.UTF_8), extensions);
+                    event.setEventId(DataTypeUtils.encodeEventId(topicName, receipt.getBlockNumber().intValue(), seq));
+                    return event;
 
-            default:
-                log.error("unknown solidity version: {}", version);
-                return null;
+                default:
+                    log.error("unknown solidity version: {}", version);
+                    return null;
+            }
+        } catch (Exception e) {
+            log.warn("decode WeEvent failed, TransactionReceipt: {} {}", receipt.getTransactionHash(), e.getMessage());
+            return null;
         }
     }
 }

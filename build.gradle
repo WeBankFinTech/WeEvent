@@ -2,9 +2,10 @@ println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent
 
 ext {
     // spring
-    spring5Version = "5.1.0.RELEASE"
+    springVersion = "5.1.15.RELEASE"
+    springMqttVersion = "5.1.11.RELEASE"
     // data.spring-data-commons
-    springDataCommonsVersion = "2.1.10.RELEASE"
+    springBootVersion = "2.1.14.RELEASE"
     // spring cloud
     springCloudVersion = "Greenwich.SR5"
 
@@ -25,14 +26,14 @@ ext {
             commonsIo   : "2.4"
     ]
     // org slf4j
-    slf4jVersion = "1.7.26"
+    slf4jVersion = "1.7.30"
     // logging.log4j
-    log4jVersion = "2.11.1"
+    log4jVersion = "2.13.3"
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
-            fiscoV1: "1.2.5",
-            fiscoV2: "2.2.3"
+            fiscoV1: "1.2.6",
+            fiscoV2: "2.2.4"
     ]
     // fabric
     fabricVersion = "1.4.4"
@@ -44,7 +45,7 @@ ext {
     // junit
     junitVersion = "4.12"
     // netty-all
-    nettyVersion = "4.1.15.Final"
+    nettyVersion = "4.1.44.Final"
     // jsonrpc
     jsonrpc4jVersion = "1.5.3"
     // JMS
@@ -60,7 +61,7 @@ ext {
     // jsoup
     jsoupVersion = "1.9.2"
     // fastjson
-    fastjsonVersion = "1.2.60"
+    fastjsonVersion = "1.2.70"
     // quartz
     quartzVersion = "2.3.0"
     // Java-WebSocket
@@ -84,7 +85,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.10.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.14.RELEASE")
         classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.1.0")
     }
 }
@@ -95,7 +96,7 @@ List lombok = [
 
 allprojects {
     group "com.webank.weevent"
-    version "1.2.0"
+    version "1.2.2"
 
     apply plugin: "java"
     apply plugin: "maven"
@@ -155,7 +156,7 @@ allprojects {
         resolutionStrategy {
             // fix security bug
             force "com.alibaba:fastjson:${fastjsonVersion}"
-            // force use netty 4.1
+            // force use netty
             force "io.netty:netty-all:${nettyVersion}"
             force "org.apache.zookeeper:zookeeper:${zookeeperVersion}"
         }

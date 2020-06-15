@@ -12,7 +12,7 @@ dependencies {
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
+    implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
 
     // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
@@ -26,7 +26,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
 
     // mqtt
-    implementation("org.springframework.integration:spring-integration-mqtt:${spring5Version}")
+    implementation("org.springframework.integration:spring-integration-mqtt:${springMqttVersion}")
 
     // json rpc, https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
     implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4jVersion}")

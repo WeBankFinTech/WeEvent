@@ -10,8 +10,8 @@ dependencies {
 
     // stomp, see https://github.com/TooTallNate/Java-WebSocket
     implementation("org.java-websocket:Java-WebSocket:${WebSocketVersion}")
-    implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
-    implementation("org.springframework:spring-messaging:${spring5Version}")
+    implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
+    implementation("org.springframework:spring-messaging:${springVersion}")
 
     // httpclient
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")

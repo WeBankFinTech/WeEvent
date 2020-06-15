@@ -9,11 +9,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.core.dto.ListPage;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.core.dto.ListPage;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
 import com.fasterxml.jackson.databind.JavaType;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public final class DataTypeUtils {
      * @param eventSeq eventSeq number
      * @return encodeString
      */
-    public static String encodeEventId(String topicName, int eventBlockNumber, int eventSeq) {
+    public static String encodeEventId(String topicName, int eventBlockNumber, long eventSeq) {
         StringBuilder sb = new StringBuilder();
         sb.append(genTopicNameHash(topicName));
         sb.append(WeEventConstants.EVENT_ID_SPLIT_CHAR);

@@ -33,7 +33,7 @@ dependencies {
 
     implementation("org.apache.commons:commons-jexl3:${apacheCommonsVersion.jexl3}")
 
-    implementation("org.springframework:spring-context-support:${spring5Version}")
+    implementation("org.springframework:spring-context-support:${springVersion}")
     // https://mvnrepository.com/artifact/org.quartz-scheduler/quartz
     implementation("org.quartz-scheduler:quartz:${quartzVersion}")
 
