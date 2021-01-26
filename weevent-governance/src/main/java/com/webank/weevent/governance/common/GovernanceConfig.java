@@ -14,38 +14,38 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
-@PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
+@PropertySource(value = "classpath:governance.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class GovernanceConfig {
 
-    @Value("${https.read-timeout:3000}")
+    @Value("${https.read-timeout}")
     private int readTimeout;
 
-    @Value("${https.connect-timeout:3000}")
+    @Value("${https.connect-timeout}")
     private int connectTimeOut;
 
-    @Value("${http.connect-timeout:3000}")
+    @Value("${http.connect-timeout}")
     private int httpConnectTimeOut;
 
     // max connect
-    @Value("${http.client.max-total:200}")
+    @Value("${http.client.max-total}")
     private int maxTotal;
 
-    @Value("${http.client.max-per-route:500}")
+    @Value("${http.client.max-per-route}")
     private int maxPerRoute;
 
-    @Value("${http.client.connection-request-timeout:3000}")
+    @Value("${http.client.connection-request-timeout}")
     private int connectionRequestTimeout;
 
-    @Value("${http.client.connection-timeout:3000}")
+    @Value("${http.client.connection-timeout}")
     private int connectionTimeout;
 
-    @Value("${http.client.socket-timeout:5000}")
+    @Value("${http.client.socket-timeout}")
     private int socketTimeout;
 
-    @Value("${jwt.private.secret:PrivateSecret}")
+    @Value("${jwt.private.secret}")
     private String PrivateSecret;
 
-    @Value("${file.transport.path:./logs}")
+    @Value("${file.transport.path}")
     private String fileTransportPath;
     
     @Value("${acount.name}")

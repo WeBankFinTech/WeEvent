@@ -22,7 +22,7 @@ spring:
         instance-host: ${spring.cloud.client.ip-address}
         instance-id: ${spring.cloud.client.ip-address}:${server.port}
         root: WeEvent/services
-      enabled: true
+      enabled: false
     # gateway
     gateway:
       enabled: true

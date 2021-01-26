@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.security.MessageDigest;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +16,6 @@ import com.webank.weevent.governance.repository.AccountRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -39,23 +37,12 @@ public class AccountService {
             if (accountEntity == null) {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername(GovernanceConfig.acount_name);
-                accountEntity.setPassword(sha256(GovernanceConfig.acount_passwrod));
+                accountEntity.setPassword(GovernanceConfig.acount_passwrod);
                 accountRepository.save(accountEntity);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new GovernanceException("init admin account fail,error:{}", e);
-        }
-    }
-
-    private static String sha256(String pwd) throws GovernanceException {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = messageDigest.digest(pwd.getBytes("UTF-8"));
-            return Hex.encodeHexString(hash).toUpperCase();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new GovernanceException("init admin account password to sha256 fail,error:{}", e);
         }
     }
 

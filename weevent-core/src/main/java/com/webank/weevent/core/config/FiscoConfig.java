@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @ToString
 @Component
-@PropertySource(value = "classpath:fisco.properties", encoding = "UTF-8")
+@PropertySource(value = "classpath:fisco.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class FiscoConfig {
     public final static String propertiesFileKey = "block-chain-properties";
 

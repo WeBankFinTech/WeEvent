@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @ToString
 @Component
-@PropertySource(value = "classpath:processor.properties", encoding = "UTF-8")
+@PropertySource(value = "classpath:processor.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class ProcessorConfig {
 
     @Value("${org.quartz.scheduler.instanceName:}")
