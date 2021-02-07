@@ -125,6 +125,7 @@ public class BrokerApplication {
     @ConditionalOnProperty(prefix = "block.chain", name = "type", havingValue = "fisco")
     public FiscoBcosDelegate fiscoBcosDelegate(FiscoConfig fiscoConfig) throws BrokerException {
         log.info("++++++++++ FISCO-BCOS Enter ++++++++++");
+        fiscoConfig.load("");
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
         return fiscoBcosDelegate;

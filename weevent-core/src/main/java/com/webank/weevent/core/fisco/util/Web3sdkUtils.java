@@ -60,17 +60,17 @@ public class Web3sdkUtils {
             ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
             taskExecutor.initialize();
 
-            if (StringUtils.isBlank(fiscoConfig.getVersion())) {
+            if (StringUtils.isBlank(fiscoConfig.getWeEventCoreConfig().getVersion())) {
                 log.error("empty FISCO-BCOS version in fisco.properties");
                 systemExit(1);
             }
 
-            if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
+            if (fiscoConfig.getWeEventCoreConfig().getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
                 if (!deployV2Contract(fiscoConfig)) {
                     systemExit(1);
                 }
             } else {
-                log.error("unknown FISCO-BCOS version: {}", fiscoConfig.getVersion());
+                log.error("unknown FISCO-BCOS version: {}", fiscoConfig.getWeEventCoreConfig().getVersion());
                 systemExit(1);
             }
         } catch (Exception e) {

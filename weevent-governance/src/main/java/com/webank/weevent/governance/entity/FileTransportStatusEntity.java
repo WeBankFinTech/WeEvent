@@ -25,7 +25,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "t_file_transport_status",
         uniqueConstraints = {@UniqueConstraint(name = "topicBrokerGroupFileName",
-                columnNames = {"broker_id", "group_id", "topic_name", "file_name"})})
+                columnNames = {"broker_id", "group_id", "topic_name", "node_address", "file_name"})})
 public class FileTransportStatusEntity extends TopicBase {
 
     @Column(name = "file_name", columnDefinition = "varchar(256)")
@@ -42,6 +42,9 @@ public class FileTransportStatusEntity extends TopicBase {
     
     @Column(name = "speed", columnDefinition = "varchar(32)")
     private String speed;
+    
+    @Column(name = "node_address", columnDefinition = "varchar(64)")
+    private String nodeAddress;
 
     // cost time in second
     @Transient

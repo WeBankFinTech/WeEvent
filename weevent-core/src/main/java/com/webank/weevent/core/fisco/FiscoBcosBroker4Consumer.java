@@ -66,7 +66,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         this.AMOPSubscriptions = fiscoBcosDelegate.initAMOP();
         this.executor = fiscoBcosDelegate.getThreadPool();
-        this.idleTime = fiscoBcosDelegate.getFiscoConfig().getConsumerIdleTime();
+        this.idleTime = fiscoBcosDelegate.getFiscoConfig().getWeEventCoreConfig().getConsumerIdleTime();
         fiscoBcosDelegate.setListener(this);
     }
 
@@ -202,7 +202,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 offset,
                 tag,
                 listener);
-        subscription.setMergeBlock(fiscoBcosDelegate.getFiscoConfig().getConsumerHistoryMergeBlock());
+        subscription.setMergeBlock(fiscoBcosDelegate.getFiscoConfig().getWeEventCoreConfig().getConsumerHistoryMergeBlock());
         subscription.setInterfaceType(interfaceType);
         subscription.setRemoteIp(remoteIp);
 

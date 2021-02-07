@@ -53,7 +53,7 @@ public class WeEventFileClientTest {
 
         weEventFileClient.openTransport4Sender(topicName);
         FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName,
-                new File("src/main/resources/ca.crt").getAbsolutePath(), true);
+                new File("src/main/resources/ca.crt").getAbsolutePath(), true, "127.0.0.1:20200", "1");
         Assert.assertNotNull(fileChunksMeta);
     }
 
@@ -93,7 +93,7 @@ public class WeEventFileClientTest {
         Thread.sleep(1000 * 10L);
 
         FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName,
-                new File("src/main/resources/ca.crt").getAbsolutePath(), true);
+                new File("src/main/resources/ca.crt").getAbsolutePath(), true, "127.0.0.1:20200", "1");
 
         Assert.assertNotNull(fileChunksMeta);
     }
@@ -134,7 +134,7 @@ public class WeEventFileClientTest {
     public void testListFile() {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         try {
-            List<FileChunksMeta> fileChunksMetas = weEventFileClient.listFiles(this.groupId, this.topicName);
+            List<FileChunksMeta> fileChunksMetas = weEventFileClient.listFiles(this.groupId, this.topicName, "127.0.0.1:20200");
             if (fileChunksMetas != null && fileChunksMetas.size()!=0) {
                 for (FileChunksMeta fileChunksMeta : fileChunksMetas) {
                     System.out.println(fileChunksMeta.getFileName() + "  "+ fileChunksMeta.getTopic() + "  " + fileChunksMeta.getGroupId());
@@ -163,7 +163,7 @@ public class WeEventFileClientTest {
             weEventFileClient.openTransport4Sender(this.topic);
             try {
                 weEventFileClient.publishFile(topic,
-                        new File("src/main/resources/bigfile.zip").getAbsolutePath(), true);
+                        new File("src/main/resources/bigfile.zip").getAbsolutePath(), true, "127.0.0.1:20200", "1");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -218,7 +218,7 @@ public class WeEventFileClientTest {
 
         @Override
         public void run() {
-            FileTransportStats fileTransportStats = weEventFileClient.status(topic);
+            FileTransportStats fileTransportStats = weEventFileClient.status(topic, "127.0.0.1:20200");
             List<FileChunksMetaStatus> fileChunksMetaStatusList = new ArrayList<>();
             if (isSender) {
                 fileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topic);
@@ -284,7 +284,7 @@ public class WeEventFileClientTest {
 
         weEventFileClient.openTransport4Sender(topicName);
         FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName,
-                new File("src/main/resources/ca.crt").getAbsolutePath(), true);
+                new File("src/main/resources/ca.crt").getAbsolutePath(), true, "127.0.0.1:20200", "1");
         Assert.assertNotNull(fileChunksMeta);
 
         SendResult sendResult = weEventFileClient.sign(fileChunksMeta);
@@ -299,7 +299,7 @@ public class WeEventFileClientTest {
         // publish file
         weEventFileClient.openTransport4Sender(topicName);
         FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName,
-                new File("src/main/resources/ca.crt").getAbsolutePath(), true);
+                new File("src/main/resources/ca.crt").getAbsolutePath(), true, "127.0.0.1:20200", "1");
         Assert.assertNotNull(fileChunksMeta);
 
         // sign
@@ -325,7 +325,7 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, ftpInfo, this.fileChunkSize, this.fiscoConfig);
 
         weEventFileClient.openTransport4Sender(topicName);
-        FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName, "./test/build_chain.sh", true);
+        FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName, "./test/build_chain.sh", true, "127.0.0.1:20200", "1");
         Assert.assertNotNull(fileChunksMeta);
     }
 
@@ -364,7 +364,7 @@ public class WeEventFileClientTest {
     @Ignore
     public void testIsFileExist() throws BrokerException {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
-        boolean ret = weEventFileClient.isFileExist("ca.crt", this.topicName, this.groupId);
+        boolean ret = weEventFileClient.isFileExist("ca.crt", this.topicName, this.groupId, "127.0.0.1:20200", "1");
         Assert.assertTrue(ret);
     }
 }

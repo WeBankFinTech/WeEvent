@@ -54,7 +54,7 @@ public class FileTransportService {
             String groupId) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
         this.producer = iProducer;
-        this.timeout = fiscoConfig.getWeb3sdkTimeout();
+        this.timeout = fiscoConfig.getWeEventCoreConfig().getTimeout();
 
         log.info("host: {}, file path: {}, chunk size: {}", host, filePath, fileChunkSize);
         if (fileChunkSize <= 0 || fileChunkSize > 2 * 1024 * 1024) {
@@ -110,7 +110,7 @@ public class FileTransportService {
                 && "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT));
     }
 
-    public FileTransportStats stats(boolean all, String groupId, String topicName) {
+    public FileTransportStats stats(boolean all, String groupId, String topicName, String nodeAddress) {
         FileTransportStats fileTransportStats = new FileTransportStats();
 
         // sender
@@ -125,7 +125,7 @@ public class FileTransportService {
         fileTransportStats.getSender().put(groupId, senders);
 
         // receiver
-        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, groupId, topicName);
+        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, groupId, topicName, nodeAddress);
         Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
         for (String topic : channel.getSubTopics()) {
             List<FileChunksMetaStatus> filePlus = localFiles.stream()
@@ -140,9 +140,9 @@ public class FileTransportService {
         return fileTransportStats;
     }
 
-    public boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException {
+    public boolean getFileExistence(String fileName, String topic, String groupId, String nodeAddress, String role) throws BrokerException {
 
-        FileChunksMeta fileChunksMeta = new FileChunksMeta("", fileName, 0, "", topic, groupId, false);
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", fileName, 0, "", topic, groupId, false, nodeAddress, role);
 
         return channel.isFileExist(fileChunksMeta);
     }

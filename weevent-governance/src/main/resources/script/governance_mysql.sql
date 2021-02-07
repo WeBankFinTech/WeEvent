@@ -42,6 +42,7 @@ CREATE TABLE  t_file_transport_channel (
   `description` VARCHAR(256) DEFAULT NULL COMMENT '主题描述',
   `role` VARCHAR(1) NOT NULL COMMENT '文件传输角色, 0:接收方 1:发布方',
   `over_write` VARCHAR(1) NOT NULL COMMENT '是否覆盖文件, 0:否 1:是',
+  `node_address` VARCHAR(64) NOT NULL COMMENT '节点地址',
   `public_key` text DEFAULT NULL COMMENT '接收方公钥',
   `private_key` text DEFAULT NULL COMMENT '接收方私钥',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
@@ -53,6 +54,7 @@ CREATE TABLE  t_file_transport_channel (
 CREATE TABLE  t_file_transport_status (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `topic_name` VARCHAR(256) NOT NULL COMMENT '主题名称',
+  `node_address` VARCHAR(64) NOT NULL COMMENT '节点地址',
   `creater` VARCHAR(256) DEFAULT NULL COMMENT '创建人',
   `broker_id` INT(11) NOT NULL COMMENT 'broker主键id',
   `group_id` VARCHAR(64) DEFAULT NULL COMMENT '群组id',

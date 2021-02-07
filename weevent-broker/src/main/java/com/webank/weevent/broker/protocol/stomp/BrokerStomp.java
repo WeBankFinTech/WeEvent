@@ -186,7 +186,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             String destination = stompHeaderAccessor.getDestination();
 
             // publish event
-            SendResult sendResult = this.iproducer.publish(new WeEvent(destination, msg.getPayload(), extensions), groupId, this.fiscoConfig.getWeb3sdkTimeout());
+            SendResult sendResult = this.iproducer.publish(new WeEvent(destination, msg.getPayload(), extensions), groupId, this.fiscoConfig.getWeEventCoreConfig().getTimeout());
 
             // send response
             StompHeaderAccessor accessor;

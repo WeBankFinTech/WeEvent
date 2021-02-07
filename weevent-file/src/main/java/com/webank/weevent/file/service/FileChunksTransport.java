@@ -34,7 +34,7 @@ public class FileChunksTransport {
         this.fileTransportService = fileTransportService;
     }
 
-    public FileChunksMeta upload(String localFile, String topic, String groupId, boolean overwrite) throws BrokerException, IOException {
+    public FileChunksMeta upload(String localFile, String topic, String groupId, boolean overwrite, String nodeAddress, String role) throws BrokerException, IOException {
         log.info("try to upload file {}", localFile);
 
         File file = new File(localFile);
@@ -55,7 +55,9 @@ public class FileChunksTransport {
                     md5,
                     topic,
                     groupId,
-                    overwrite);
+                    overwrite,
+                    nodeAddress,
+                    role);
             // get chunk information
             fileChunksMeta = this.openFileChunksInfo(fileChunksMeta);
 
@@ -109,7 +111,11 @@ public class FileChunksTransport {
                     fileChunksMeta.getFileSize(),
                     fileChunksMeta.getFileMd5(),
                     fileChunksMeta.getTopic(),
-                    fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+                    fileChunksMeta.getGroupId(),
+                    fileChunksMeta.isOverwrite(),
+                    fileChunksMeta.getNodeAddress(),
+                    fileChunksMeta.getRole()
+                    );
         } catch (UnsupportedEncodingException e) {
             log.error("decode fileName error", e);
             throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);

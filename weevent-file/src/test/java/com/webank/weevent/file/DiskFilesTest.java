@@ -172,7 +172,7 @@ public class DiskFilesTest {
     public void testListNotCompleteFiles() throws BrokerException {
         this.diskFiles.createFixedLengthFile(this.fileChunksMeta);
 
-        List<FileChunksMeta> fileChunksMetaList = this.diskFiles.listNotCompleteFiles(true, "1", "com.weevent.file");
+        List<FileChunksMeta> fileChunksMetaList = this.diskFiles.listNotCompleteFiles(true, "1", "com.weevent.file", "127.0.0.1:20200");
         Assert.assertTrue(!fileChunksMetaList.isEmpty());
     }
 }

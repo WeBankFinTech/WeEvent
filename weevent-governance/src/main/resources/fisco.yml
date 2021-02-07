@@ -1,0 +1,54 @@
+################ weevent core config ################
+
+version: 2.0
+orgId: fisco
+
+timeout: 10000
+poolSize: 10
+maxPoolSize: 200
+keepAliveSeconds: 10
+web3sdkEncryptType: ECDSA_TYPE
+
+consumerHistoryMergeBlock: 8
+consumerIdleTime: 1000
+
+
+################ fisco bcos sdk cofnig config ################
+# https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/java_sdk/configuration.html
+
+cryptoMaterial:
+  #  certPath: "conf"
+  caCert: "ca.crt"
+  sslCert: "sdk.crt"
+  sslKey: "sdk.key"
+#  enSslCert: "conf/gm/gmensdk.crt"
+#  enSslKey: "conf/gm/gmensdk.key"
+
+account:
+  accountAddress: "bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd"
+#  accountFileFormat: "pem"
+#  accountFilePath: ""
+  keyStoreDir: "account"
+#  password: ""
+
+#amop:
+#  - publicKeys: [ "conf/amop/consumer_public_key_1.pem" ]
+#    topicName: "PrivateTopic1"
+#  - password: "123456"
+#    privateKey: "conf/amop/consumer_private_key.p12"
+#    topicName: "PrivateTopic2"
+
+
+network:
+  peers:
+    - "127.0.0.1:20200"
+
+threadPool:
+  channelProcessorThreadSize: "16"
+  maxBlockingQueueSize: "102400"
+  receiptProcessorThreadSize: "16"
+
+
+
+
+

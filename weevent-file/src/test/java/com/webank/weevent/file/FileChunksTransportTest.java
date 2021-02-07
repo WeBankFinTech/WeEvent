@@ -68,7 +68,7 @@ public class FileChunksTransportTest {
     @Ignore
     public void testUpload() throws Exception {
         FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-        FileChunksMeta fileChunksMeta = fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID, true);
+        FileChunksMeta fileChunksMeta = fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID, true, "127.0.0.1:20200", "1");
         Assert.assertNotNull(fileChunksMeta);
     }
 
@@ -102,7 +102,7 @@ public class FileChunksTransportTest {
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(fileTransportService1);
 
-            FileChunksMeta fileChunksMeta1 = fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID, true);
+            FileChunksMeta fileChunksMeta1 = fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID, true, "127.0.0.1:20200", "1");
             Assert.assertNotNull(fileChunksMeta1);
         } catch (Exception e) {
             e.printStackTrace();

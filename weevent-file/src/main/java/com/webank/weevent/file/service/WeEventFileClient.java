@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -44,6 +45,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 
@@ -156,7 +158,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     @Override
-    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
+    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite, String nodeAddress, String role) throws BrokerException, IOException {
         // check if topic is exist
         IProducer iProducer = this.fileTransportService.getProducer();
         if (!iProducer.exist(topic, this.groupId)) {
@@ -168,7 +170,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             }
         }
 
-        String newTopic = this.fileTransportService.getChannel().switchTopic(topic);
+        String newTopic = this.fileTransportService.getChannel().switchTopic(topic, nodeAddress, role);
         boolean resOpen = iProducer.open(newTopic, this.groupId);
         if (!resOpen) {
             log.error("create topic: {} failed.", newTopic);
@@ -199,7 +201,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             validateLocalFile(filePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(filePath, newTopic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(filePath, newTopic, this.groupId, overwrite, nodeAddress, role);
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
@@ -207,7 +209,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), newTopic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), newTopic, this.groupId, overwrite, nodeAddress, role);
         }
         return fileChunksMeta;
     }
@@ -218,6 +220,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
         amopChannel.subTopic(topic, fileEventListener);
+    }
+    
+    public Set<String> getSubscribers(String topic) throws BrokerException {
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        return amopChannel.getSubscribers(topic);
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
@@ -258,8 +265,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     @Override
-    public FileTransportStats status(String topicName) {
-        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, topicName);
+    public FileTransportStats status(String topicName, String nodeAddress) {
+        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, topicName, nodeAddress);
         if (fileTransportStats == null) {
             log.error("get status error");
             return null;
@@ -286,10 +293,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         return retFileTransportStats;
     }
 
-    public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
+    public List<FileChunksMeta> listFiles(String group, String topic, String nodeAddress) throws BrokerException {
+    	nodeAddress = nodeAddress.replace(",", "").replace(":", "").replace(".", "");
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
+        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + nodeAddress + PATH_SEPARATOR + topic;
         if (filePath.indexOf("..") != -1) {
             log.info("file path not exist.. filePath, {}", filePath);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
@@ -391,8 +399,8 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
-        return this.fileTransportService.getFileExistence(fileName, topic, groupId);
+    public boolean isFileExist(String fileName, String topic, String groupId, String nodeAddress, String role) throws BrokerException {
+        return this.fileTransportService.getFileExistence(fileName, topic, groupId, nodeAddress, role);
     }
 
     private static void validateLocalFile(String filePath) throws BrokerException {

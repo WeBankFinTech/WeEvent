@@ -14,7 +14,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
 
-    // spring boot with log4j2
+    implementation("org.fisco-bcos.java-sdk:java-sdk:${web3sdkVersion.fisco}") {
+        // io.netty:netty-tcnative-boringssl-static:2.0.20.Final crash
+        // exclude group: "io.netty"
+        exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
+        // compile solidity
+        exclude group: "org.ethereum", module: "solcJ-all"
+        exclude group: "org.slf4j", module: "slf4j-log4j12"
+    }
+
+        // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
@@ -39,6 +48,17 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // mqtt
     testImplementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${PahoClientVersion}")
+    
+    // persist database
+    implementation("org.apache.commons:commons-dbcp2:${apacheCommonsVersion.dbcp2}")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisVersion}")
+    implementation("org.mariadb.jdbc:mariadb-java-client:${mariadbClientVersion}")
+    
+    //jpa
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    
+    //h2
+    implementation("com.h2database:h2:${h2Version}")
 }
 
 gitProperties {

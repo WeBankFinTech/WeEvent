@@ -89,7 +89,7 @@ public class FileTransportServiceTest {
      */
     @Test
     public void testStats() {
-        this.fileTransportService.stats(true, this.fileChunksMeta.getGroupId(), this.fileChunksMeta.getTopic());
+        this.fileTransportService.stats(true, this.fileChunksMeta.getGroupId(), this.fileChunksMeta.getTopic(), "127.0.0.1:20200");
         Assert.assertTrue(true);
     }
 

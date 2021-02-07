@@ -24,6 +24,9 @@ public class MQTTTest extends JUnitTestBase {
 
     private final String url = "tcp://localhost:7001";
     private final int actionTimeout = 3000;
+    
+    private final String userName = "user";
+    private final char[] password = "123456".toCharArray();
 
     private MqttClient mqttClient;
     private final String content = "hello mqtt via tcp";
@@ -54,12 +57,16 @@ public class MQTTTest extends JUnitTestBase {
         this.cleanupOptions.setKeepAliveInterval(this.actionTimeout);
         this.cleanupOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
         this.cleanupOptions.setCleanSession(true);
+        this.cleanupOptions.setUserName(userName);
+        this.cleanupOptions.setPassword(password);
 
         this.persistOptions = new MqttConnectOptions();
         this.persistOptions.setConnectionTimeout(this.actionTimeout);
         this.persistOptions.setKeepAliveInterval(this.actionTimeout);
         this.persistOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
         this.persistOptions.setCleanSession(false);
+        this.persistOptions.setUserName(userName);
+        this.persistOptions.setPassword(password);
 
         this.mqttClient = new MqttClient(this.url, clientId, null);
         this.mqttClient.connect(this.cleanupOptions);

@@ -7,6 +7,11 @@ gradle.properties
 logs/
 build/
 out/
+weevent-core/dist/
+weevent-client/dist/
+weevent-broker/dist/
+weevent-governance/dist/
+weevent-processor/dist/
 
 ### npm build
 node_modules/
@@ -33,3 +38,4 @@ node_modules/
 /.nb-gradle/
 
 .history/*
+git.properties

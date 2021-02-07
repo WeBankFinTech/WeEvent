@@ -71,20 +71,20 @@ public class FiscoBcosDelegate {
 
     public void initProxy(FiscoConfig config) throws BrokerException {
         this.fiscoConfig = config;
-        this.threadPool = Web3SDKConnector.initThreadPool(config.getWeb3sdkCorePoolSize(),
-                config.getWeb3sdkMaxPoolSize(),
-                config.getWeb3sdkKeepAliveSeconds());
+        this.threadPool = Web3SDKConnector.initThreadPool(config.getWeEventCoreConfig().getPoolSize(),
+                config.getWeEventCoreConfig().getMaxPoolSize(),
+                config.getWeEventCoreConfig().getKeepAliveSeconds());
 
-        if (StringUtils.isBlank(config.getVersion())) {
+        if (StringUtils.isBlank(config.getWeEventCoreConfig().getVersion())) {
             log.error("the fisco version in fisco.properties is empty");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
-        if (StringUtils.isBlank(config.getNodes())) {
+        if (0 == config.getConfigProperty().getNetwork().size()) {
             log.error("the fisco nodes in fisco.properties is null");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
-        if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+        if (config.getWeEventCoreConfig().getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // 1 is always exist

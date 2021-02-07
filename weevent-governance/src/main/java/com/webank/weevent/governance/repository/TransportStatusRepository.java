@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface TransportStatusRepository extends JpaRepository<FileTransportStatusEntity, Long> {
 
-	List<FileTransportStatusEntity> queryByBrokerIdAndGroupIdAndTopicName(Integer brokerId, String groupId,
-                                                                          String topicName);
+	List<FileTransportStatusEntity> queryByBrokerIdAndGroupIdAndNodeAddressAndTopicName(Integer brokerId, String groupId,
+                                                                          String topicName, String nodeAddress);
 
 	FileTransportStatusEntity queryByBrokerIdAndGroupIdAndTopicNameAndFileName(Integer brokerId, String groupId, String topicName, String fileName);
 

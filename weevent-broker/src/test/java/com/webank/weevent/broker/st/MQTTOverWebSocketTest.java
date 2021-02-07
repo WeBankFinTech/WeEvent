@@ -24,6 +24,9 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
 
     private String url;
     private final int actionTimeout = 3000;
+    
+    private final String userName = "user";
+    private final char[] password = "123456".toCharArray();
 
     private MqttClient mqttClient;
     private final String content = "hello mqtt via websocket";
@@ -54,6 +57,8 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
         this.cleanupOptions.setKeepAliveInterval(this.actionTimeout);
         this.cleanupOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
         this.cleanupOptions.setCleanSession(true);
+        this.cleanupOptions.setUserName(userName);
+        this.cleanupOptions.setPassword(password);
 
         this.mqttClient = new MqttClient(this.url, clientId, null);
         this.mqttClient.connect(this.cleanupOptions);
