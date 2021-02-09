@@ -57,47 +57,15 @@ public class Web3SDKConnector {
         ConfigOption configOption;
 
         try {
-            Map<String, Object> cryptoMaterial = new HashMap<>();
-            cryptoMaterial.put("caCert",
-                    resolver.getResource("classpath:" + fiscoConfig.getCaCrtPath()).getFile().getPath());
-            cryptoMaterial.put("sslKey",
-                    resolver.getResource("classpath:" + fiscoConfig.getSdkKeyPath()).getFile().getPath());
-            cryptoMaterial.put("sslCert",
-                    resolver.getResource("classpath:" + fiscoConfig.getSdkCrtPath()).getFile().getPath());
-
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-                log.info("SM2_TYPE");
-                cryptoMaterial.put("enSslKey",
-                        resolver.getResource("classpath:" + fiscoConfig.getSdkGmKeyPath()).getFile().getPath());
-                cryptoMaterial.put("enSslCert",
-                        resolver.getResource("classpath:" + fiscoConfig.getSdkCrtPath()).getFile().getPath());
-            }
-            Map<String, Object> network = new HashMap<>();
-            network.put("peers", Arrays.asList(fiscoConfig.getNodes().split(";")));
-
-            Map<String, Object> account = new HashMap<>();
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-                account.put("accountAddress",
-                        resolver.getResource("classpath:" + fiscoConfig.getPemKeyPath()).getFile().getPath());
-            }
-            Map<String, Object> threadPool = new HashMap<>();
-            threadPool.put("maxBlockingQueueSize", String.valueOf(fiscoConfig.getMaxBlockingQueueSize()));
-
-            ConfigProperty configProperty = new ConfigProperty();
-            configProperty.setAccount(account);
-            configProperty.setCryptoMaterial(cryptoMaterial);
-            configProperty.setNetwork(network);
-            configProperty.setThreadPool(threadPool);
-
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
-                configOption = new ConfigOption(configProperty, CryptoType.ECDSA_TYPE);
-            } else if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-                configOption = new ConfigOption(configProperty, CryptoType.SM_TYPE);
+            if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
+                configOption = new ConfigOption(fiscoConfig.getConfigProperty(), CryptoType.ECDSA_TYPE);
+            } else if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("SM2_TYPE")) {
+                configOption = new ConfigOption(fiscoConfig.getConfigProperty(), CryptoType.SM_TYPE);
             } else {
-                log.error("unknown encrypt type:{}, support ECDSA_TYPE or SM2_TYPE", fiscoConfig.getWeb3sdkEncryptType());
+                log.error("unknown encrypt type:{}, support ECDSA_TYPE or SM2_TYPE", fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType());
                 throw new BrokerException(ErrorCode.BCOS_SDK_BUILD_ERROR);
             }
-        } catch (ConfigException | IOException e) {
+        } catch (ConfigException e) {
             log.error("build BcosSDK, load configOption fail", e);
             throw new BrokerException(ErrorCode.BCOS_SDK_BUILD_ERROR);
         }
@@ -119,8 +87,8 @@ public class Web3SDKConnector {
             StopWatch sw = StopWatch.createStarted();
 
             Client client = sdk.getClient(groupId);
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
-                CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(fiscoConfig.getAccount());
+            if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
+                CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair((String)fiscoConfig.getConfigProperty().getAccount().get("accountAddress"));
                 client.getCryptoSuite().setCryptoKeyPair(keyPair);
             }
 

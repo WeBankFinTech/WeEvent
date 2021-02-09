@@ -26,6 +26,10 @@
     "method": "post",
     "url": "topic/list"
   },
+  "nodeAddress": {
+    "method": "get",
+    "url": "topic/nodeAddress"
+  },
   "subscription": {
     "method": "get",
     "url": "weevent-broker/admin/listSubscription"
@@ -173,6 +177,10 @@
   "listTransport": {
     "method": "get",
     "url": "file/listTransport"
+  },
+  "getSubscribers": {
+    "method": "post",
+    "url": "file/getSubscribers"
   },
   "openTransport": {
     "method": "post",

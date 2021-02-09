@@ -104,6 +104,7 @@ create TABLE t_file_transport_channel (
     description VARCHAR (255),
     role VARCHAR(1) NOT NULL,
     over_write VARCHAR(1) NOT NULL,
+    node_address VARCHAR(64) NOT NULL,
     public_key text,
     private_key text,
     delete_at BIGINT NOT NULL,
@@ -125,6 +126,7 @@ CREATE TABLE  t_file_transport_status (
     delete_at BIGINT NOT NULL,
     group_id VARCHAR (64),
     topic_name VARCHAR (128),
+    node_address VARCHAR(64) NOT NULL,
     transport_status VARCHAR(1),
     speed VARCHAR(64),
     PRIMARY KEY (id)

@@ -54,7 +54,7 @@ public class FileTransportService {
             String groupId) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
         this.producer = iProducer;
-        this.timeout = fiscoConfig.getWeb3sdkTimeout();
+        this.timeout = fiscoConfig.getWeEventCoreConfig().getTimeout();
 
         log.info("host: {}, file path: {}, chunk size: {}", host, filePath, fileChunkSize);
         if (fileChunkSize <= 0 || fileChunkSize > 2 * 1024 * 1024) {

@@ -50,11 +50,9 @@ import org.fisco.bcos.sdk.amop.Amop;
 import org.fisco.bcos.sdk.amop.AmopMsgOut;
 import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.AmopResponseCallback;
-import org.fisco.bcos.sdk.channel.ResponseCallback;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.SendTransaction;
 import org.fisco.bcos.sdk.contract.Contract;
-import org.fisco.bcos.sdk.model.Response;
 import org.fisco.bcos.sdk.model.RetCode;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.model.TransactionReceiptStatus;
@@ -111,7 +109,7 @@ public class FiscoBcos2 {
         this.client = Web3SDKConnector.initClient(this.sdk, groupId, this.fiscoConfig);
 
         if (this.topicController == null) {
-            this.timeout = this.fiscoConfig.getWeb3sdkTimeout();
+            this.timeout = this.fiscoConfig.getWeEventCoreConfig().getTimeout();
 
             CRUDAddress crudAddress = new CRUDAddress(this.client);
             Map<Long, String> addresses = crudAddress.listAddress();
@@ -364,7 +362,7 @@ public class FiscoBcos2 {
             for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
                 receiptOptional = this.client.getTransactionReceipt(transactionHash).getTransactionReceipt();
                 if (!receiptOptional.isPresent()) {
-                    Thread.sleep(this.fiscoConfig.getConsumerIdleTime());
+                    Thread.sleep(this.fiscoConfig.getWeEventCoreConfig().getConsumerIdleTime());
                 } else {
                     return receiptOptional;
                 }

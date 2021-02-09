@@ -320,7 +320,9 @@ module.exports = {
   file: {
     addOne: '新增文件传输通道',
     boundTopic: '绑定的主题',
+    boundNode: '选择节点',
     creatTime: '创建时间',
+    nodeAddress: '节点地址',
     creater: '创建人',
     roles: '操作角色',
     options: '操作',
@@ -328,6 +330,7 @@ module.exports = {
     receiver: '接收方',
     upload: '上传文件',
     download: '下载文件',
+    subscribeList: '订阅列表',
     publicKey: '公钥',
     privateKey: '私钥',
     isDelete: '删除通道',

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -44,6 +45,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 
@@ -219,6 +221,11 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         amopChannel.subTopic(topic, fileEventListener);
     }
+    
+    public Set<String> getSubscribers(String topic) throws BrokerException {
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        return amopChannel.getSubscribers(topic);
+    }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
@@ -289,7 +296,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
+        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + DiskFiles.getNodeAddress() + PATH_SEPARATOR + PATH_SEPARATOR + topic;
         if (filePath.indexOf("..") != -1) {
             log.info("file path not exist.. filePath, {}", filePath);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST);

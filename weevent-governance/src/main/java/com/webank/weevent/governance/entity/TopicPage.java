@@ -21,4 +21,7 @@ public class TopicPage {
     private Integer pageSize;
 
     private List<TopicEntity> topicInfoList;
+    
+    private List<String> nodeAddress;
+    
 }

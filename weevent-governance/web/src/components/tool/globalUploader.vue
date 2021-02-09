@@ -83,7 +83,7 @@ export default {
       file.topicName = sessionStorage.getItem('uploadName')
       const ov = sessionStorage.getItem('overWrite')
       if (ov === '0') {
-        const url = '?fileName=' + file.name + '&brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + sessionStorage.getItem('uploadName')
+        const url = '?fileName=' + file.name + '&brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + sessionStorage.getItem('uploadName') + '&nodeAddress=' + sessionStorage.getItem('uploadNodeAddress') + '&role=' + sessionStorage.getItem('uploadRole')
         API.checkUploaded(url).then(res => {
           if (res.data.code === 0 && !res.data.data) {
             vm.computeMD5(file)

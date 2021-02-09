@@ -55,7 +55,7 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
     @Test
     public void testBuildProducer() throws Exception {
         WeEvent weEvent = new WeEvent(this.topicName, "hello weevent".getBytes());
-        SendResult sendResult = this.iProducer.publish(weEvent, this.groupId, this.fiscoConfig.getWeb3sdkTimeout());
+        SendResult sendResult = this.iProducer.publish(weEvent, this.groupId, this.fiscoConfig.getWeEventCoreConfig().getTimeout());
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 

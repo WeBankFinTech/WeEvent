@@ -24,8 +24,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_file_transport_channel",
-        uniqueConstraints = {@UniqueConstraint(name = "topicBrokerGroupDelete",
-                columnNames = {"topic_name", "broker_id", "group_id"})})
+        uniqueConstraints = {@UniqueConstraint(name = "topicBrokerGroupDelete", columnNames = {"topic_name", "broker_id", "group_id", "node_address", "role"})})
 public class FileTransportChannelEntity extends TopicBase {
 
     @Column(name = "role", columnDefinition = "varchar(1)")
@@ -39,6 +38,9 @@ public class FileTransportChannelEntity extends TopicBase {
 
     @Column(name = "over_write", columnDefinition = "varchar(1)")
     private String overWrite;
+    
+    @Column(name = "node_address", columnDefinition = "varchar(64)")
+    private String nodeAddress;
 
     @Transient
     private String createTime;

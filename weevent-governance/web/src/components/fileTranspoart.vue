@@ -2,7 +2,6 @@
 <div class='event-table topic fileTranspoart'>
   <div class='refresh top_part'>
     <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>{{$t('common.add')}}</el-button>
-    <el-button type='primary' @click='generatePPK()'>{{$t('file.generatePPK')}}</el-button>
   </div>
   <el-table
     :data="tableData"
@@ -66,6 +65,11 @@
       >
     </el-table-column>
     <el-table-column
+      :label="$t('file.nodeAddress')"
+      prop="nodeAddress"
+    >
+    </el-table-column>
+    <el-table-column
       :label="$t('file.creater')"
       prop="creater"
     >
@@ -95,8 +99,10 @@
       :label="$t('file.options')"
       width='300'
       >
-      <template  slot-scope="scope">
+      <template slot-scope="scope">
         <el-button size='mini' type='primary' @click.stop='fileOption(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{scope.row.role === '1' ? $t('file.upload') : $t('file.download')}}</el-button>
+        <el-button size='mini' type='primary' @click='showlog = !showlog' @click.stop='getSubscribers(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{$t('file.subscribeList')}}</el-button>
+        <el-button size='mini' type='primary' @click='generatePPK(scope.row)'>{{$t('file.generatePPK')}}</el-button>
         <el-tooltip v-show="scope.row.overWrite === '1'" class="item" effect="dark" :content="$t('file.fileCover')" placement="top">
           <i class='el-icon-warning' style='font-size:18px;color:#006cff'></i>
         </el-tooltip>
@@ -106,15 +112,15 @@
   </el-table>
   <el-dialog :title="$t('file.addOne')" :visible.sync="dialogFormVisible" center width='450px' :close-on-click-modal='false'>
     <el-form :model="form" :rules="rules" ref='form' label-position="top">
+      <el-form-item :label="$t('file.boundNode') + ':'" prop='node'>
+        <el-select v-model="form.node">
+          <el-option v-for="item in listNode" :value="item"></el-option>
+        </el-select>
+      </el-form-item >
       <el-form-item :label="$t('file.boundTopic') + ':'" prop='name'>
         <el-select v-model="form.name" @visible-change='selectShow'>
           <el-option v-for="(item, index) in listTopic" :key="index" :label="item.topicName" :value="item.topicName"></el-option>
-          <el-pagination
-            layout="prev, pager, next"
-            small
-            :current-page.sync="pageIndex"
-            :total="total">
-          </el-pagination>
+          <el-pagination layout="prev, pager, next" small :current-page.sync="pageIndex" :total="total"></el-pagination>
         </el-select>
       </el-form-item >
       <el-form-item :label="$t('file.roles') + ':'" prop='roles'>
@@ -141,6 +147,13 @@
       <el-button @click="dialogFormVisible = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
+
+  <el-dialog :title="$t('file.subscribeList')" :visible.sync="showlog" center width='600px' :close-on-click-modal='false'>
+    <el-table :data="topicTableData" v-loading='loading' element-loading-spinner='el-icon-loading' :element-loading-text="$t('common.loading')" element-loading-background='rgba(256,256,256,0.8)' style="width: 100%" @row-dblclick='rowClick' @expand-change='readDetail' ref='table'>
+      <el-table-column :label="$t('file.nodeAddress')" prop="ipAndPort"></el-table-column>
+    </el-table>
+  </el-dialog>
+
   <el-dialog :title="$t('file.downloadList')" :visible.sync="showDownList" center :close-on-click-modal='false'>
     <el-table
     :data="downLoadList"
@@ -170,6 +183,13 @@ import Bus from './tool/js/bus'
 const con = require('../../config/config.js')
 export default {
   data () {
+    var node = (node, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('tableCont.noName')))
+      } else {
+        callback()
+      }
+    }
     var name = (rule, value, callback) => {
       if (value === '') {
         callback(new Error(this.$t('tableCont.noName')))
@@ -189,11 +209,15 @@ export default {
       showDownList: false,
       loading: false,
       dialogFormVisible: false,
+      showlog: false,
       tableData: [],
+      topicTableData: [],
       fileList: [],
       listTopic: [],
+      listNode: [],
       downLoadList: [],
       form: {
+      	node: '',
         name: '',
         roles: '',
         overwrite: '0',
@@ -201,6 +225,9 @@ export default {
         privateKey: ''
       },
       rules: {
+        node: [
+          { required: true, validator: node, trigger: 'blur' }
+        ],
         name: [
           { required: true, validator: name, trigger: 'blur' }
         ],
@@ -264,6 +291,7 @@ export default {
       vm.$refs.form.validate((valid) => {
         if (valid) {
           const data = {
+          	nodeAddress: vm.form.node,
             topicName: vm.form.name,
             brokerId: Number(localStorage.getItem('brokerId')),
             groupId: localStorage.getItem('groupId'),
@@ -355,7 +383,7 @@ export default {
     },
     downStatus (e) {
       const vm = this
-      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress
       API.downLoadStatus(url).then(res => {
         if (res.data.code === 0) {
           if (res.data.data && res.data.data.length > 0) {
@@ -394,7 +422,7 @@ export default {
     },
     upStatus (e) {
       const vm = this
-      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress
       API.uploadStatus(url).then(res => {
         if (res.data.code === 0) {
           if (res.data.data && res.data.data.length > 0) {
@@ -520,15 +548,20 @@ export default {
       if (e.role === '1') {
         // upload file
         sessionStorage.setItem('uploadName', e.topicName)
+        sessionStorage.setItem('uploadNodeAddress', e.nodeAddress)
+        sessionStorage.setItem('uploadRole', e.role)
         sessionStorage.setItem('overWrite', e.overWrite)
         Bus.$emit('openUploader', {
+          nodeAddress: e.nodeAddress,
+          role: e.role,
           topicName: e.topicName,
           brokerId: localStorage.getItem('brokerId'),
-          groupId: localStorage.getItem('groupId')
+          groupId: localStorage.getItem('groupId'),
+          nodeAddress: e.nodeAddress
         })
       } else {
         // download file
-        const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+        const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress + '&role=' + e.role
         API.listFile(url).then(res => {
           if (res.data.code === 0) {
             this.downLoadList = [].concat(res.data.data)
@@ -552,10 +585,10 @@ export default {
     selectShow (e) {
       if (e && this.pageIndex !== 1) {
         this.pageIndex = 1
-        this.getLsitData()
+        this.getListData()
       }
     },
-    getLsitData () {
+    getListData () {
       const vm = this
       const data = {
         pageIndex: vm.pageIndex - 1,
@@ -570,6 +603,28 @@ export default {
           }
           if (res.data.data.topicInfoList) {
             vm.listTopic = [].concat(res.data.data.topicInfoList)
+          }
+          if(res.data.data.nodeAddress){
+            this.listNode = [].concat(res.data.data.nodeAddress)
+          }
+        }
+      })
+    },
+    getSubscribers (e) {
+      const topicName = e.topicName
+      const nodeAddress = e.nodeAddress
+      const role = e.role
+      const data = {
+        brokerId: Number(localStorage.getItem('brokerId')),
+        groupId: Number(localStorage.getItem('groupId')),
+        topicName: topicName,
+        role: role,
+        nodeAddress: nodeAddress
+      }
+      API.getSubscribers(data).then(res => {
+        if (res.data.code === 0) {
+          if (res.data.data) {
+            this.topicTableData = [].concat(res.data.data)
           }
         }
       })
@@ -603,7 +658,7 @@ export default {
     },
     generatePPK (e) {
       const vm = this
-      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&filePath=' + "./logs"
+      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
@@ -654,6 +709,7 @@ export default {
   watch: {
     dialogFormVisible (nVal) {
       if (!nVal) {
+      	this.form.node = ''
         this.form.name = ''
         this.form.roles = ''
         this.form.publicKey = ''
@@ -663,7 +719,7 @@ export default {
       }
     },
     pageIndex (nVal) {
-      this.getLsitData()
+      this.getListData()
     },
     groupId (nVal) {
       if (nVal !== '-1') {

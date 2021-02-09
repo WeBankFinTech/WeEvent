@@ -320,7 +320,9 @@ module.exports = {
   file: {
     addOne: 'New File Transmission',
     boundTopic: 'Bound Topic',
+    boundNode: 'Bound Node',
     creatTime: 'Creat Time',
+    nodeAddress: 'Node Address',
     creater: 'Creater',
     roles: 'Roles',
     options: 'Options',
@@ -328,6 +330,7 @@ module.exports = {
     receiver: 'Receiver',
     upload: 'Upload',
     download: 'Download',
+    subscribeList: 'Subscribers List',
     publicKey: 'Public Key',
     privateKey: 'Private Key',
     isDelete: 'Delete Topic',

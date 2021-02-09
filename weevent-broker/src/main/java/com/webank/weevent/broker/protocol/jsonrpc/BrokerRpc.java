@@ -50,7 +50,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, JsonHelper.object2Json(extensions));
 
-        return this.producer.publish(new WeEvent(topic, content, extensions), groupId, this.fiscoConfig.getWeb3sdkTimeout());
+        return this.producer.publish(new WeEvent(topic, content, extensions), groupId, this.fiscoConfig.getWeEventCoreConfig().getTimeout());
     }
 
     @Override

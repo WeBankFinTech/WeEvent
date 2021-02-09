@@ -17,9 +17,9 @@ import java.util.concurrent.TimeoutException;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.dto.AmopMsgResponse;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
-import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.file.dto.FileEvent;
 import com.webank.weevent.file.service.FileChunksMeta;
@@ -27,7 +27,7 @@ import com.webank.weevent.file.service.WeEventFileClient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
-import org.bouncycastle.crypto.prng.RandomGenerator;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.BcosSDKException;
 import org.fisco.bcos.sdk.amop.Amop;
 import org.fisco.bcos.sdk.amop.AmopCallback;
@@ -35,6 +35,8 @@ import org.fisco.bcos.sdk.amop.AmopMsgOut;
 import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
+import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -54,6 +56,7 @@ public class AMOPChannel extends AmopCallback {
     private static final String TOPIC_SEPARATOR = "-";
     private final FileTransportService fileTransportService;
     //    public Service service;
+    public BcosSDK bcosSDK;
     public Amop amop;
     public ThreadPoolTaskExecutor threadPool;
 
@@ -84,7 +87,8 @@ public class AMOPChannel extends AmopCallback {
 
         // new service
         try {
-            this.amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
+            this.bcosSDK = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig());
+            this.amop = this.bcosSDK.getAmop();
         } catch (BcosSDKException e) {
             log.error("build BcosSDK failed.", e);
             throw new BrokerException(ErrorCode.BCOS_SDK_BUILD_ERROR);
@@ -109,6 +113,18 @@ public class AMOPChannel extends AmopCallback {
         return new HashSet<>(subVerifyTopics);
     }
 
+    public Set<String> getSubscribers(String topic) {
+    	Integer groupId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
+        Set<String> subscribers = new HashSet<>();
+        Peers peers = this.bcosSDK.getClient(groupId).getPeers();
+        log.info("peers:{}", peers.getPeers());
+        for (Peers.PeerInfo peer : peers.getPeers()){
+            if(peer.getTopic().contains(topic)){
+                subscribers.add(peer.getIpAndPort());
+            }
+        }
+        return subscribers;
+    }
 
     // Receiver call subscribe topic
     public void subTopic(String topic, WeEventFileClient.EventListener eventListener) throws BrokerException {
@@ -219,7 +235,7 @@ public class AMOPChannel extends AmopCallback {
             }
 
             AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
-            if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            if (ErrorCode.SUCCESS.getCode() != amopMsgResponse.getErrorCode()) {
                 log.error("create remote file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
             }
@@ -376,12 +392,12 @@ public class AMOPChannel extends AmopCallback {
                     fileChunksMeta.getFileSize(),
                     fileChunksMeta.getFileMd5(),
                     topic,
-                    fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+                    fileChunksMeta.getGroupId(),
+                    fileChunksMeta.isOverwrite());
         } catch (UnsupportedEncodingException e) {
             log.error("decode fileName error", e);
             throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
         }
-
         return newFileChunksMeta;
     }
 
@@ -492,7 +508,7 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
-
+                    
                     FileChunksMeta retFileChunksMeta = this.fileTransportService.prepareReceiveFile(getNewFileChunksMeta(fileChunksMeta));
                     log.info("create file context success, fileName: {}", fileEvent.getFileChunksMeta().getFileName());
 

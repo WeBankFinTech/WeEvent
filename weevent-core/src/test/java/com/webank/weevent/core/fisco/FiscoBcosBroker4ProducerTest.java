@@ -456,7 +456,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     private CryptoKeyPair getExternalAccountCryptoKeyPair() {
-        if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
+        if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
             return (new ECDSAKeyPair()).generateKeyPair();
         } else {
             return (new SM2KeyPair()).generateKeyPair();

@@ -1,10 +1,13 @@
 package com.webank.weevent.broker.protocol.mqtt;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.config.WeEventConfig;
+import com.webank.weevent.broker.entiry.AccountTopicAuthEntity;
+import com.webank.weevent.broker.entiry.AuthorSessions;
 import com.webank.weevent.broker.protocol.mqtt.command.Connect;
 import com.webank.weevent.broker.protocol.mqtt.command.DisConnect;
 import com.webank.weevent.broker.protocol.mqtt.command.PingReq;
@@ -17,6 +20,8 @@ import com.webank.weevent.broker.protocol.mqtt.store.MessageIdStore;
 import com.webank.weevent.broker.protocol.mqtt.store.PersistSession;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
+import com.webank.weevent.broker.repository.AccountRepository;
+import com.webank.weevent.broker.repository.AccountTopicAuthRepository;
 import com.webank.weevent.broker.utils.ZKStore;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -37,6 +42,8 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import io.netty.handler.codec.mqtt.MqttSubscribePayload;
+import io.netty.handler.codec.mqtt.MqttTopicSubscription;
 import io.netty.handler.codec.mqtt.MqttUnacceptableProtocolVersionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,12 +62,16 @@ import org.springframework.stereotype.Component;
 public class ProtocolProcess {
     // fix length of message id in variableHeader
     public static int fixLengthOfMessageId = 2;
+    
+    private final static Integer SUB_PUB  = 0;
+    private final static Integer SUB = 1;
+    private final static Integer PUB = 2;
 
     private final int heartBeat;
 
     private final SessionStore sessionStore;
     // session id(channel id if from tcp) <-> clientId
-    private final Map<String, String> authorSessions = new ConcurrentHashMap<>();
+    private final Map<String, AuthorSessions> authorSessions = new ConcurrentHashMap<>();
     private final MessageIdStore messageIdStore = new MessageIdStore();
 
     // MQTT commands
@@ -72,14 +83,19 @@ public class ProtocolProcess {
     private final UnSubscribe unSubscribe;
     private final DisConnect disConnect;
 
+    private final Environment environment;
+    private final AccountTopicAuthRepository accountTopicAuthRepository;
+
     @Autowired
     public ProtocolProcess(Environment environment,
                            WeEventConfig weEventConfig,
                            FiscoConfig fiscoConfig,
                            IProducer producer,
-                           IConsumer consumer) throws BrokerException {
-        AuthService authService = new AuthService(environment.getProperty("spring.security.user.name"),
-                environment.getProperty("spring.security.user.password"));
+                           IConsumer consumer,
+                           AccountRepository accountRepository,
+                           AccountTopicAuthRepository accountTopicAuthRepository) throws BrokerException {
+        boolean auth = environment.getProperty("spring.security.user.auth", Boolean.class, false);
+        AuthService authService = new AuthService(auth, accountRepository);
 
         // try to initialize ZKStore
         boolean zookeeper = environment.getProperty("spring.cloud.zookeeper.enabled", Boolean.class, true);
@@ -89,7 +105,7 @@ public class ProtocolProcess {
             log.info("try to initialize ZKStore to persist MQTT session");
             zkStore = new ZKStore<>(PersistSession.class, "/WeEvent/mqtt", connectString);
         }
-        this.sessionStore = new SessionStore(producer, consumer, fiscoConfig.getWeb3sdkTimeout(), this.messageIdStore, zkStore);
+        this.sessionStore = new SessionStore(producer, consumer, fiscoConfig.getWeEventCoreConfig().getTimeout(), this.messageIdStore, zkStore);
         this.heartBeat = weEventConfig.getKeepAlive();
 
         this.connect = new Connect(authService, this.sessionStore);
@@ -99,6 +115,8 @@ public class ProtocolProcess {
         this.subscribe = new Subscribe(this.sessionStore);
         this.unSubscribe = new UnSubscribe(this.sessionStore);
         this.disConnect = new DisConnect(this.sessionStore);
+        this.environment = environment;
+        this.accountTopicAuthRepository = accountTopicAuthRepository;
     }
 
     public int getHeartBeat() {
@@ -109,7 +127,7 @@ public class ProtocolProcess {
         if (this.authorSessions.containsKey(sessionId)) {
             log.info("clean session: {}", sessionId);
 
-            String clientId = this.authorSessions.get(sessionId);
+            String clientId = this.authorSessions.get(sessionId).getClientId();
             this.sessionStore.removeSession(clientId);
             this.authorSessions.remove(sessionId);
         }
@@ -157,7 +175,9 @@ public class ProtocolProcess {
         MqttConnAckMessage rsp = (MqttConnAckMessage) this.connect.processConnect(msg, sessionData);
         // if accept
         if (rsp.variableHeader().connectReturnCode() == MqttConnectReturnCode.CONNECTION_ACCEPTED) {
-            this.authorSessions.put(sessionData.getSessionId(), sessionData.getClientId());
+            AuthorSessions sessionsParam = AuthorSessions.builder().clientId(sessionData.getClientId())
+                    .userName("user").build();
+            this.authorSessions.put(sessionData.getSessionId(), sessionsParam);
         }
         return rsp;
     }
@@ -182,10 +202,41 @@ public class ProtocolProcess {
             throw new BrokerException(ErrorCode.MQTT_CONNECT_CONFLICT);
         }
 
-        String clientId = this.authorSessions.get(sessionId);
+        String clientId = this.authorSessions.get(sessionId).getClientId();
         if (!this.sessionStore.existSession(clientId)) {
             log.error("unknown clientId, skip it");
             throw new BrokerException(ErrorCode.MQTT_UNKNOWN_CLIENT_ID);
+        }
+
+        boolean auth = environment.getProperty("spring.security.user.topic.auth", Boolean.class, false);
+        if (auth && req.fixedHeader().messageType().equals(MqttMessageType.PUBLISH)) {
+            boolean isAuth = false;
+            String topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
+            String userName = this.authorSessions.get(sessionId).getUserName();
+            List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserName(userName);
+            for (AccountTopicAuthEntity entity : entities) {
+                if (entity.getTopicName().equals(topicName) && (entity.getPermission() == SUB_PUB || entity.getPermission() == SUB)) {
+                    isAuth = true;
+                }
+            }
+            if (!isAuth) {
+                log.error("userName:{},topicName:{}, not publish permission", userName, topicName);
+                throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+            }
+        }
+
+        if (auth && req.fixedHeader().messageType().equals(MqttMessageType.SUBSCRIBE)) {
+            List<MqttTopicSubscription> topicSubscriptions = ((MqttSubscribePayload) req.payload()).topicSubscriptions();
+            for (MqttTopicSubscription topicSubscription : topicSubscriptions) {
+                String topicName = topicSubscription.topicName();
+                String userName = this.authorSessions.get(sessionId).getUserName();
+                AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicName(userName, topicName);
+                if (null != entity && (entity.getPermission() == SUB_PUB || entity.getPermission() == PUB)) {
+                    return this.subscribe.process(req, clientId, remoteIp);
+                }
+                log.error("userName:{},topicName:{}, not subscribe permission", userName, topicName);
+                throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+            }
         }
 
         switch (req.fixedHeader().messageType()) {
